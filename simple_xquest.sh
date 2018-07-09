@@ -42,6 +42,7 @@ For the latter, please use the default configuration.\n"
   printf "Done.\n\n"
 
   # Configuring Apache 2
+  sudo service apache2 restart
   printf "Configuring the Apache 2 web server...\nThe script will ask you your password.\n"
   sudo chmod -R 777 $HOME/xquest/results
   # apache2.conf
@@ -52,18 +53,23 @@ For the latter, please use the default configuration.\n"
   sudo echo "AddHandler cgi-script .cgi .pl .py" >> /etc/apache2/apache2.conf
   # serve-cgi-bin.conf
   sudo cp /etc/apache2/conf-available/serve-cgi-bin.conf /etc/apache2/conf-available/serve-cgi-bin.conf.bak
-  sudo sed -i '/\/usr\/lib\//\/var\/www\/' /etc/apache2/conf-available/serve-cgi-bin.conf
+  sudo sed -i 's/\/usr\/lib\//\/var\/www\/g' /etc/apache2/conf-available/serve-cgi-bin.conf
   sudo sed -i '/Require all granted/d' /etc/apache2/conf-available/serve-cgi-bin.conf
-  sudo sed -i '/Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch/Options +ExecCGI' /etc/apache2/conf-available/serve-cgi-bin.conf
+  sudo sed -i 's/Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch/Options +ExecCGI/g' /etc/apache2/conf-available/serve-cgi-bin.conf
   # 000-default.conf
   sudo cp /etc/apache2/conf-available/000-default.conf /etc/apache2/conf-available/000-default.conf.bak
-  sudo sed -i '/DocumentRoot \/var\/www\/html\//DocumentRoot \/var\/www\/' /etc/apache2/conf-available/000-default.conf
+  sudo sed -i 's/DocumentRoot \/var\/www\/html\//DocumentRoot \/var\/www\/g' /etc/apache2/conf-available/000-default.conf
   # Enabling CGI module
   sudo a2enmod cgi
   # Creating cgi-bin folder and symlinks
   sudo mkdir /var/www/cgi-bin/
-  sudo ln -s $HOME/xquest/V2_1_1/xquest/cgi/ /var/www/cgi-bin/xquest-cgi/
+  sudo ln -s $HOME/xquest/V2_1_1/xquest/cgi/ /var/www/cgi-bin/xquest/
   sudo ln -s $HOME/xquest/results/ /var/www/results/
+  # Configuring xQuest for Apache 2
+  sed -i "s/xquest-desktop/$(hostname -s)/g" $HOME/xquest/V2_1_1/xquest/modules/Environment.pm
+  sed -i 's/xquestvm/xquest-ubuntu/g' $HOME/xquest/V2_1_1/xquest/modules/Environment.pm
+  sed -i "s/\/home\/xquest\/results/$HOME\/xquest\/results/g" $HOME/xquest/V2_1_1/xquest/conf/web.config
+
   # Restarting Apache 2 server
   sudo service apache2 restart
   printf "Done.\n\n"
@@ -87,22 +93,24 @@ the option is not provided.\n\n"
   printf -- "\t-d | --directory [run]: analysis directory name.
         e.g.: $HOME/xquest/analysis/run.\n\n"
   printf -- "\t-m | --mzxml [./]: path to the mzXML files, including ending '/' e.g.
-        /path/to/mzxmls/.\n\n"
+        /path/to/mzXML/.\n\n"
   printf -- "\t-f | --fasta [./my_db.fasta]: path to the FASTA database, e.g.
         /path/to/fasta/my_db.fasta.\n\n"
   printf -- "\t-x | --xquest: run xQuest after preparations are done.
         Options xmlmode and pseudosh are used for xQuest.\n\n"
-  printf -- "\p-s | --xprophet: run xProphet after preparations are done."
+  printf -- "\t-p | --xprophet: run xProphet after preparations are done."
   printf -- "\t-h | --help: prints this help.\n\n"
 
-  printf "EXAMPLE: xquest_prepare -l files -p /path/to/mzxmls/.\n"
+  printf "EXAMPLE: xquest_prepare -l files -p /path/to/mzXML/.\n"
 }
 
 ##### MAIN #####
 
 # Adding xQuest bin to PATH
-cp $HOME/.bashrc $HOME/.bashrc.bak
-source sourcefile
+if [[ ":$PATH$:" != *:"$HOME/xquest/V2_1_1/xquest/bin:"* ]]; then
+  cp $HOME/.bashrc $HOME/.bashrc.bak
+  source sourcefile
+fi
 
 interactive=
 dl=
@@ -165,7 +173,7 @@ fi
 # and reverse database
 printf "Copying mzxml and fasta files to $HOME/xquest/analysis/$directory/... "
 cd $HOME/xquest/analysis/$directory/
-cp $mzxml/*.mzxml mzxml/
+cp $mzxml/*.mzXML mzxml/
 cp $fasta db/database.fasta
 xdecoy.pl -db db/database.fasta > /dev/null
 runXquest.pl -getdef > /dev/null
@@ -223,5 +231,5 @@ if [ "$xquest" = "1" ]; then
 
   # Displaying the result manager
   printf "Display the result manager.\n"
-  firefox localhost/cgi-bin/xquest-cgi/resultsmanager.cgi
+  firefox localhost/cgi-bin/xquest/resultsmanager.cgi
 fi
