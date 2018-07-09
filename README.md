@@ -10,7 +10,7 @@ This script runs on Ubuntu 18.04 LTS. All dependencies for xQuest/xProphet can b
 
 Clone the project, then
 ```
-cd molecular-dynamics/
+cd simple-xquest/
 chmod 755 simple_xquest.sh
 ./simple_xquest.sh -h
 ```
