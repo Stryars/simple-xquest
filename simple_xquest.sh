@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# xquest_prepare - a script to prepare and start xquest runs.
+# xquest_prepare - a script to prepare and start xquest/xprophet runs.
 
 # This script can download and install the xQuest/xProphet 2.1.1 pipeline and its
 # dependencies (Apache 2, Perl libraries, etc.) and prepare the necessary
@@ -102,7 +102,8 @@ the option is not provided.\n\n"
 
 interactive=
 dl=
-start=
+xquest=
+xprophet=
 directory="run"
 mzxml="./"
 fasta="./"
@@ -130,7 +131,9 @@ while [ "$1" != "" ]; do
     -f | --fasta)         shift
                           fasta=$1
                           ;;
-    -s | --start)         start=1
+    -x | --xquest)        xquest=1
+                          ;;
+    -p | --xprophet)      xprophet=1
                           ;;
     -h | --help)          usage
                           exit
@@ -165,7 +168,56 @@ runXquest.pl -getdef > /dev/null
 printf "Done.\n\n"
 
 # Configuring definition files
-read -p "You will now configure xquest.def. Press enter to continue."
+read -p "You will now configure xquest.def. Press enter to continue.\n"
 nano xquest.def
-read -p "You will now configure xmm.def. Press enter to continue."
+read -p "You will now configure xmm.def. Press enter to continue.\n"
 nano xmm.def
+
+# Starting the search
+if [ "$xquest" = "1" ]; then
+  printf "Configuring the search...\n\n"
+  ls mzxml/ | sed 's/\(.*\)\..*/\1/' > files
+  pQuest.pl -list files -path $HOME/xquest/analysis/$directory/mzxml/
+  printf "Done.\n\n"
+  printf "Running the search...\n\n"
+  runXquest.pl -list files -xmlmode -pseudosh
+  printf "Done.\n\n"
+
+  # Merging result files
+  printf "Merging result files... "
+  resultfolder=$HOME/xquest/analysis/$directory/results$directory
+  mergexml.pl -list resultdirectories_fullpath -resdir $resultfolder > /dev/null
+  printf "Done.\n\n"
+
+  # Annotate search results
+  printf "Annotating search results... "
+  cd $resultfolder
+  annotatexml.pl -xmlfile merged_xquest.xml -out annotated_xquest.xml -native> /dev/null
+  printf "Done.\n\n"
+
+  if [ "$xprophet" = "1"]; then
+    # Configuring xProphet analysis
+    printf "Configuring xProphet analysis...\n"
+    xprophet.pl > /dev/null
+    read -p "You will now configure xproph.def. Press enter to continue.\n"
+    nano xproph.def
+    printf "Done.\n\n"
+
+    # Starting xProphet analysis
+    printf "Running xProphet... "
+    xprophet.pl -in annotated_xquest.xml -out xquest.xml > /dev/null
+    printf "Done.\n\n"
+  else
+    mv annotated_xquest xquest.xml
+  fi
+
+  # Copying results to the results folder for the web server
+  printf "Copying results to the web server...\nThe script will ask your password to give the correct permissions to Apache 2.\n"
+  cp -R $resultfolder $HOME/xquest/results
+  sudo chmod -R 777 $HOME/xquest/results/results$directory
+  printf "Done.\n\n"
+
+  # Displaying the result manager
+  printf "Display the result manager.\n"
+  firefox localhost/cgi-bin/xquest-cgi/resultsmanager.cgi
+fi
