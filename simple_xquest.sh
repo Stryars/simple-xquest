@@ -33,7 +33,7 @@ For the latter, please use the default configuration.\n"
 
   # Installing xQuest/xProphet
   printf "Installing xQuest/xProphet...\n"
-  printf "Please use the default location for the stylesheet (/Var/www/)."
+  printf "Please use the default location for the stylesheet (/var/www/).\n"
   sed '1s/.*/INSTALLDIR=$HOME\/xquest\/V2_1_1\/xquest/' install_xquest.sh > install_xquest_new.sh
   mv install_xquest.sh install_xquest.sh.bak
   mv install_xquest_new.sh install_xquest.sh
@@ -47,28 +47,28 @@ For the latter, please use the default configuration.\n"
   sudo chmod -R 777 $HOME/xquest/results
   # apache2.conf
   sudo cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak
-  sudo echo "ServerName localhost" >> /etc/apache2/apache2.conf
-  sudo echo "ScriptAlias /cgi-bin/ /var/www/cgi-bin/" >> /etc/apache2/apache2.conf
-  sudo echo "Options +ExecCGI" >> /etc/apache2/apache2.conf
-  sudo echo "AddHandler cgi-script .cgi .pl .py" >> /etc/apache2/apache2.conf
+  sudo bash -c 'echo "ServerName localhost" >> /etc/apache2/apache2.conf'
+  sudo bash -c 'echo "ScriptAlias /cgi-bin/ /var/www/cgi-bin/" >> /etc/apache2/apache2.conf'
+  sudo bash -c 'echo "Options +ExecCGI" >> /etc/apache2/apache2.conf'
+  sudo bash -c 'echo "AddHandler cgi-script .cgi .pl .py" >> /etc/apache2/apache2.conf'
   # serve-cgi-bin.conf
   sudo cp /etc/apache2/conf-available/serve-cgi-bin.conf /etc/apache2/conf-available/serve-cgi-bin.conf.bak
-  sudo sed -i 's/\/usr\/lib\//\/var\/www\/g' /etc/apache2/conf-available/serve-cgi-bin.conf
-  sudo sed -i '/Require all granted/d' /etc/apache2/conf-available/serve-cgi-bin.conf
-  sudo sed -i 's/Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch/Options +ExecCGI/g' /etc/apache2/conf-available/serve-cgi-bin.conf
+  sudo sed -i "s#/usr/lib/#/var/www/#g" /etc/apache2/conf-available/serve-cgi-bin.conf
+  sudo sed -i "/Require all granted/d" /etc/apache2/conf-available/serve-cgi-bin.conf
+  sudo sed -i "s/Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch/Options +ExecCGI/g" /etc/apache2/conf-available/serve-cgi-bin.conf
   # 000-default.conf
   sudo cp /etc/apache2/conf-available/000-default.conf /etc/apache2/conf-available/000-default.conf.bak
-  sudo sed -i 's/DocumentRoot \/var\/www\/html\//DocumentRoot \/var\/www\/g' /etc/apache2/conf-available/000-default.conf
+  sudo sed -i "s#DocumentRoot /var/www/html/#DocumentRoot /var/www/g" /etc/apache2/conf-available/000-default.conf
   # Enabling CGI module
   sudo a2enmod cgi
   # Creating cgi-bin folder and symlinks
   sudo mkdir /var/www/cgi-bin/
-  sudo ln -s $HOME/xquest/V2_1_1/xquest/cgi/ /var/www/cgi-bin/xquest/
-  sudo ln -s $HOME/xquest/results/ /var/www/results/
+  sudo ln -s $HOME/xquest/V2_1_1/xquest/cgi/ /var/www/cgi-bin/xquest
+  sudo ln -s $HOME/xquest/results/ /var/www/results
   # Configuring xQuest for Apache 2
   sed -i "s/xquest-desktop/$(hostname -s)/g" $HOME/xquest/V2_1_1/xquest/modules/Environment.pm
-  sed -i 's/xquestvm/xquest-ubuntu/g' $HOME/xquest/V2_1_1/xquest/modules/Environment.pm
-  sed -i "s/\/home\/xquest\/results/$HOME\/xquest\/results/g" $HOME/xquest/V2_1_1/xquest/conf/web.config
+  sed -i "s/xquestvm/xquest-ubuntu/g" $HOME/xquest/V2_1_1/xquest/modules/Environment.pm
+  sed -i "s#/home/xquest/results#$HOME/xquest/results#g" $HOME/xquest/V2_1_1/xquest/conf/web.config
 
   # Restarting Apache 2 server
   sudo service apache2 restart
@@ -107,9 +107,10 @@ the option is not provided.\n\n"
 ##### MAIN #####
 
 # Adding xQuest bin to PATH
-if [[ ":$PATH$:" != *:"$HOME/xquest/V2_1_1/xquest/bin:"* ]]; then
+if [[ ":$PATH:" != *":$HOME/xquest/V2_1_1/xquest/bin:"* ]]; then
   cp $HOME/.bashrc $HOME/.bashrc.bak
-  source sourcefile
+  echo "export PATH=$PATH:$HOME/xquest/V2_1_1/xquest/bin" >> $HOME/.bashrc
+  source $HOME/.bashrc
 fi
 
 interactive=
