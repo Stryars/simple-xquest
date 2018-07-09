@@ -107,13 +107,16 @@ the option is not provided.\n\n"
 ##### MAIN #####
 
 # Adding xQuest bin to PATH
-if [[ ":$PATH:" == *":$HOME/xquest/V2_1_1/xquest/bin:"* ]]; then
-  printf "PATH correctly set.\n\n"
-else
-  cp $HOME/.bashrc $HOME/.bashrc.bak
-  echo "export PATH=$PATH:$HOME/xquest/V2_1_1/xquest/bin" >> $HOME/.bashrc
-  source $HOME/.bashrc
-fi
+case ":$PATH:" in
+  *:$HOME/xquest/V2_1_1/xquest/bin:*) printf "PATH correctly set.\n\n"
+                                      ;;
+  *)  printf "Setting PATH... "
+      cp $HOME/.bashrc $HOME/.bashrc.bak
+      echo "export PATH=$PATH:$HOME/xquest/V2_1_1/xquest/bin" >> $HOME/.bashrc
+      source $HOME/.bashrc
+      printf "Done.\n\n"
+      ;;
+esac
 
 interactive=
 dl=
