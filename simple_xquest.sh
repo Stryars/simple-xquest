@@ -57,8 +57,8 @@ For the latter, please use the default configuration.\n"
   sudo sed -i "/Require all granted/d" /etc/apache2/conf-available/serve-cgi-bin.conf
   sudo sed -i "s/Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch/Options +ExecCGI/g" /etc/apache2/conf-available/serve-cgi-bin.conf
   # 000-default.conf
-  sudo cp /etc/apache2/conf-available/000-default.conf /etc/apache2/conf-available/000-default.conf.bak
-  sudo sed -i "s#DocumentRoot /var/www/html/#DocumentRoot /var/www/g" /etc/apache2/conf-available/000-default.conf
+  sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak
+  sudo sed -i "s#DocumentRoot /var/www/html/#DocumentRoot /var/www#g" /etc/apache2/sites-available/000-default.conf
   # Enabling CGI module
   sudo a2enmod cgi
   # Creating cgi-bin folder and symlinks
@@ -107,7 +107,9 @@ the option is not provided.\n\n"
 ##### MAIN #####
 
 # Adding xQuest bin to PATH
-if [[ ":$PATH:" != *":$HOME/xquest/V2_1_1/xquest/bin:"* ]]; then
+if [[ ":$PATH:" == *":$HOME/xquest/V2_1_1/xquest/bin:"* ]]; then
+  printf "PATH correctly set.\n\n"
+else
   cp $HOME/.bashrc $HOME/.bashrc.bak
   echo "export PATH=$PATH:$HOME/xquest/V2_1_1/xquest/bin" >> $HOME/.bashrc
   source $HOME/.bashrc
