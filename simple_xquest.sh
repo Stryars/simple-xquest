@@ -2,7 +2,7 @@
 
 # xquest_prepare - a script to prepare and start xquest runs.
 
-# This script can download and installs the xQuest/xProphet 2.1.1 pipeline and its
+# This script can download and install the xQuest/xProphet 2.1.1 pipeline and its
 # dependencies (Apache 2, Perl libraries, etc.) and prepare the necessary
 # directory structure.
 
