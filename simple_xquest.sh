@@ -90,7 +90,7 @@ the option is not provided.\n\n"
         /path/to/mzxmls/.\n\n"
   printf -- "\t-f | --fasta [./my_db.fasta]: path to the FASTA database, e.g.
         /path/to/fasta/my_db.fasta.\n\n"
-  printf -- "\x-s | --xquest: run xQuest after preparations are done.
+  printf -- "\t-x | --xquest: run xQuest after preparations are done.
         Options xmlmode and pseudosh are used for xQuest.\n\n"
   printf -- "\p-s | --xprophet: run xProphet after preparations are done."
   printf -- "\t-h | --help: prints this help.\n\n"
