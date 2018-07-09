@@ -68,6 +68,7 @@ For the latter, please use the default configuration.\n"
   # Configuring xQuest for Apache 2
   sed -i "s/xquest-desktop/$(hostname -s)/g" $HOME/xquest/V2_1_1/xquest/modules/Environment.pm
   sed -i "s/xquestvm/xquest-ubuntu/g" $HOME/xquest/V2_1_1/xquest/modules/Environment.pm
+  sed -i "s#\/home\/xquest\/xquest#\/home\/$(whoami)\/xquest\/V2_1_1\/xquest" $HOME/xquest/V2_1_1/xquest/modules/Environment.pm
   sed -i "s#/home/xquest/results#$HOME/xquest/results#g" $HOME/xquest/V2_1_1/xquest/conf/web.config
 
   # Restarting Apache 2 server
