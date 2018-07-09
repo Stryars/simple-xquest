@@ -28,7 +28,7 @@ function download {
 For the latter, please use the default configuration.\n"
   cd V2_1_1/xquest/installation
   chmod 755 install_packages.sh
-  # ./install_packages.sh
+  ./install_packages.sh
   printf "Done.\n\n"
 
   # Installing xQuest/xProphet
@@ -36,10 +36,10 @@ For the latter, please use the default configuration.\n"
   sed '1s/.*/INSTALLDIR=$HOME\/xquest\/V2_1_1\/xquest/' install_xquest.sh > install_xquest_new.sh
   mv install_xquest.sh install_xquest.sh.bak
   mv install_xquest_new.sh install_xquest.sh
-  # ./install_xquest.sh
+  ./install_xquest.sh
   cp $HOME/.bashrc $HOME/.bashrc.bak
-  # echo "# Add xQuest bin to PATH" >> $HOME/.bashrc
-  # echo "export PATH=$PATH:$HOME/xquest/V2_1_1/xquest/bin" >> $HOME/.bashrc
+  echo "# Add xQuest bin to PATH" >> $HOME/.bashrc
+  echo "export PATH=$PATH:$HOME/xquest/V2_1_1/xquest/bin" >> $HOME/.bashrc
   printf "Done.\n\n"
 
   # Configuring Apache 2
@@ -168,9 +168,9 @@ runXquest.pl -getdef > /dev/null
 printf "Done.\n\n"
 
 # Configuring definition files
-read -p "You will now configure xquest.def. Press enter to continue.\n"
+read -p "You will now configure xquest.def. Press enter to continue."
 nano xquest.def
-read -p "You will now configure xmm.def. Press enter to continue.\n"
+read -p "You will now configure xmm.def. Press enter to continue."
 nano xmm.def
 
 # Starting the search
@@ -199,7 +199,7 @@ if [ "$xquest" = "1" ]; then
     # Configuring xProphet analysis
     printf "Configuring xProphet analysis...\n"
     xprophet.pl > /dev/null
-    read -p "You will now configure xproph.def. Press enter to continue.\n"
+    read -p "You will now configure xproph.def. Press enter to continue."
     nano xproph.def
     printf "Done.\n\n"
 
