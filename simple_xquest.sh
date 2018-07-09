@@ -33,13 +33,12 @@ For the latter, please use the default configuration.\n"
 
   # Installing xQuest/xProphet
   printf "Installing xQuest/xProphet...\n"
+  printf "Please use the default location for the stylesheet (/Var/www/)."
   sed '1s/.*/INSTALLDIR=$HOME\/xquest\/V2_1_1\/xquest/' install_xquest.sh > install_xquest_new.sh
   mv install_xquest.sh install_xquest.sh.bak
   mv install_xquest_new.sh install_xquest.sh
+  chmod 755 install_xquest.sh
   ./install_xquest.sh
-  cp $HOME/.bashrc $HOME/.bashrc.bak
-  echo "# Add xQuest bin to PATH" >> $HOME/.bashrc
-  echo "export PATH=$PATH:$HOME/xquest/V2_1_1/xquest/bin" >> $HOME/.bashrc
   printf "Done.\n\n"
 
   # Configuring Apache 2
@@ -91,14 +90,19 @@ the option is not provided.\n\n"
         /path/to/mzxmls/.\n\n"
   printf -- "\t-f | --fasta [./my_db.fasta]: path to the FASTA database, e.g.
         /path/to/fasta/my_db.fasta.\n\n"
-  printf -- "\t-s | --start: run xQuest/xProphet after preparations are done.
+  printf -- "\x-s | --xquest: run xQuest after preparations are done.
         Options xmlmode and pseudosh are used for xQuest.\n\n"
+  printf -- "\p-s | --xprophet: run xProphet after preparations are done."
   printf -- "\t-h | --help: prints this help.\n\n"
 
   printf "EXAMPLE: xquest_prepare -l files -p /path/to/mzxmls/.\n"
 }
 
 ##### MAIN #####
+
+# Adding xQuest bin to PATH
+cp $HOME/.bashrc $HOME/.bashrc.bak
+source sourcefile
 
 interactive=
 dl=
@@ -111,7 +115,7 @@ fasta="./"
 
 # The script should not be run as root
 if [ "$EUID" = 0 ]
-  then echo "Please do not this script run as root."
+  then echo "Please do not run this script as root."
   exit
 fi
 
@@ -195,7 +199,7 @@ if [ "$xquest" = "1" ]; then
   annotatexml.pl -xmlfile merged_xquest.xml -out annotated_xquest.xml -native> /dev/null
   printf "Done.\n\n"
 
-  if [ "$xprophet" = "1"]; then
+  if [ "$xprophet" = "1" ]; then
     # Configuring xProphet analysis
     printf "Configuring xProphet analysis...\n"
     xprophet.pl > /dev/null
