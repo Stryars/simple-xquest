@@ -14,12 +14,20 @@ function download {
   # Downloading xQuest/xProphet
   printf "Downloading xQuest/xProphet... "
   cd $HOME/xquest
-  wget -q --user=xquest --password=xprophet http://proteomics.ethz.ch/xquest2_www//downloads/V2_1_1.tar > /dev/null
+  if [ "$verbose" = "1" ]; then
+    wget -q --user=xquest --password=xprophet http://proteomics.ethz.ch/xquest2_www//downloads/V2_1_1.tar
+  else
+    wget -q --user=xquest --password=xprophet http://proteomics.ethz.ch/xquest2_www//downloads/V2_1_1.tar > /dev/null
+  fi
   printf "Done.\n\n"
 
   # Extracting the archive
   printf "Extracting tar... "
-  tar -xf V2_1_1.tar > /dev/null
+  if [ "$verbose" = "1" ]; then
+    tar -xvf V2_1_1.tar
+  else
+    tar -xf V2_1_1.tar > /dev/null
+  fi
   rm V2_1_1.tar
   printf "Done.\n\n"
 
@@ -99,6 +107,7 @@ the option is not provided.\n\n"
   printf -- "\t-x | --xquest: run xQuest after preparations are done.
         Options xmlmode and pseudosh are used for xQuest.\n\n"
   printf -- "\t-p | --xprophet: run xProphet after preparations are done."
+  printf -- "\t-v | --verbose: verbose mode."
   printf -- "\t-h | --help: prints this help.\n\n"
 
   printf "EXAMPLE: xquest_prepare -l files -p /path/to/mzXML/.\n"
@@ -118,7 +127,6 @@ case ":$PATH:" in
       ;;
 esac
 
-interactive=
 dl=
 xquest=
 xprophet=
@@ -136,8 +144,6 @@ fi
 # Command line options
 while [ "$1" != "" ]; do
   case $1 in
-    -i | --interactive)   interactive=1
-                          ;;
     -D | --download)      dl=1
                           ;;
     -d | --directory)     shift
@@ -153,6 +159,8 @@ while [ "$1" != "" ]; do
                           ;;
     -p | --xprophet)      xprophet=1
                           ;;
+    -v | --verbose        verbose=1
+                          ;;
     -h | --help)          usage
                           exit
                           ;;
@@ -162,13 +170,10 @@ while [ "$1" != "" ]; do
   shift
 done
 
-if [ "$interactive" = "1" ]; then
-  printf "Interactive mode is on.\n\n"
-else
-  printf "Interactive mode is off.\n\n"
-fi
-
+# Creating directory structure
+printf "Creating directory structure... "
 mkdir -p $HOME/xquest/{results,analysis/$directory/{mzxml,db}}
+printf "Done.\n\n"
 
 # Download and install xQuest/xProphet and its dependencies
 if [ "$dl" = "1" ]; then
@@ -181,8 +186,13 @@ printf "Copying mzxml and fasta files to $HOME/xquest/analysis/$directory/... "
 cd $HOME/xquest/analysis/$directory/
 cp $mzxml/*.mzXML mzxml/
 cp $fasta db/database.fasta
-xdecoy.pl -db db/database.fasta > /dev/null
-runXquest.pl -getdef > /dev/null
+if [ "$verbose" = "1" ]; then
+  xdecoy.pl -db db/database.fasta
+  runXquest.pl -getdef
+else
+  xdecoy.pl -db db/database.fasta > /dev/null
+  runXquest.pl -getdef > /dev/null
+fi
 printf "Done.\n\n"
 
 # Configuring definition files
@@ -204,26 +214,43 @@ if [ "$xquest" = "1" ]; then
   # Merging result files
   printf "Merging result files... "
   resultfolder=$HOME/xquest/analysis/$directory/results$directory
-  mergexml.pl -list resultdirectories_fullpath -resdir $resultfolder > /dev/null
+  printf $resultfolder
+  if [ "$verbose" = "1" ]; then
+    mergexml.pl -list resultdirectories_fullpath -resdir $resultfolder
+  else
+    mergexml.pl -list resultdirectories_fullpath -resdir $resultfolder > /dev/null
+  fi
   printf "Done.\n\n"
 
   # Annotate search results
   printf "Annotating search results... "
   cd $resultfolder
-  annotatexml.pl -xmlfile merged_xquest.xml -out annotated_xquest.xml -native> /dev/null
+  if [ "$verbose" = "1" ]; then
+    annotatexml.pl -xmlfile merged_xquest.xml -out annotated_xquest.xml -native
+  else
+    annotatexml.pl -xmlfile merged_xquest.xml -out annotated_xquest.xml -native > /dev/null
+  fi
   printf "Done.\n\n"
 
   if [ "$xprophet" = "1" ]; then
     # Configuring xProphet analysis
     printf "Configuring xProphet analysis...\n"
-    xprophet.pl > /dev/null
+    if [ "$verbose" = "1" ]; then
+      xprophet.pl
+    else
+      xprophet.pl > /dev/null
+    fi
     read -p "You will now configure xproph.def. Press enter to continue."
     nano xproph.def
     printf "Done.\n\n"
 
     # Starting xProphet analysis
     printf "Running xProphet... "
-    xprophet.pl -in annotated_xquest.xml -out xquest.xml > /dev/null
+    if [ "$verbose" = "1" ]; then
+      xprophet.pl -in annotated_xquest.xml -out xquest.xml
+    else
+      xprophet.pl -in annotated_xquest.xml -out xquest.xml > /dev/null
+    fi
     printf "Done.\n\n"
   else
     mv annotated_xquest xquest.xml
