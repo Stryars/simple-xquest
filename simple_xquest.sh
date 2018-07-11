@@ -121,14 +121,15 @@ the option is not provided.\n\n"
         /path/to/fasta/my_db.fasta.\n\n"
   printf -- "\t-x | --xquest: run xQuest after preparations are done.
         Options xmlmode and pseudosh are used for xQuest.\n\n"
-  printf -- "\t-p | --xprophet: run xProphet after preparations are done."
-  printf -- "\t-v | --verbose: verbose mode."
+  printf -- "\t-p | --xprophet: run xProphet after preparations are done.\n\n"
+  printf -- "\t-v | --verbose: verbose mode.\n\n"
   printf -- "\t-h | --help: prints this help.\n\n"
 
   printf "EXAMPLE: xquest_prepare -l files -p /path/to/mzXML/.\n"
 }
 
 ##### MAIN #####
+root=$(pwd)
 dl=
 xquest=
 xprophet=
@@ -191,14 +192,24 @@ cp $mzxml/*.mzXML mzxml/
 cp $fasta db/database.fasta
 if [ "$verbose" = "1" ]; then
   xdecoy.pl -db db/database.fasta
-  runXquest.pl -getdef
 else
   xdecoy.pl -db db/database.fasta > /dev/null
-  runXquest.pl -getdef > /dev/null
 fi
+if [ -f $HOME/xquest/analysis/$directory/xquest.def ]; then
+  printf "\nxquest.def already exists, renamed to xquest.def.bak.\n"
+  mv xquest.def xquest.def.bak
+fi
+cp root/deffiles/xquest.def .
+if [ -f $HOME/xquest/analysis/$directory/xquest.def ]; then
+  printf "\nxmm.def already exists, renamed to xquest.def.bak.\n"
+  mv xmm.def xmm.def.bak
+fi
+cp root/deffiles/xmm.def .
 printf "Done.\n\n"
 
 # Configuring definition files
+sed -i "s#/path/to/database/database.fasta#$HOME/xquest/analysis/$directory/db/database.fasta"
+sed -i "s#/path/to/decoy-database/database.fasta#$HOME/xquest/analysis/$directory/db/database_decoy.fasta"
 read -p "You will now configure xquest.def. Press enter to continue."
 nano xquest.def
 read -p "You will now configure xmm.def. Press enter to continue."
