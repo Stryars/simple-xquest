@@ -199,17 +199,17 @@ if [ -f $HOME/xquest/analysis/$directory/xquest.def ]; then
   printf "\nxquest.def already exists, renamed to xquest.def.bak.\n"
   mv xquest.def xquest.def.bak
 fi
-cp root/deffiles/xquest.def .
+cp $root/deffiles/xquest.def .
 if [ -f $HOME/xquest/analysis/$directory/xquest.def ]; then
   printf "\nxmm.def already exists, renamed to xquest.def.bak.\n"
   mv xmm.def xmm.def.bak
 fi
-cp root/deffiles/xmm.def .
+cp $root/deffiles/xmm.def .
 printf "Done.\n\n"
 
 # Configuring definition files
-sed -i "s#/path/to/database/database.fasta#$HOME/xquest/analysis/$directory/db/database.fasta"
-sed -i "s#/path/to/decoy-database/database.fasta#$HOME/xquest/analysis/$directory/db/database_decoy.fasta"
+sed -i "s#/path/to/database/database.fasta#$HOME/xquest/analysis/$directory/db/database.fasta#g" $HOME/xquest/analysis/$directory/xquest.def
+sed -i "s#/path/to/decoy-database/database.fasta#$HOME/xquest/analysis/$directory/db/database_decoy.fasta#g" $HOME/xquest/analysis/$directory$/xquest.def
 read -p "You will now configure xquest.def. Press enter to continue."
 nano xquest.def
 read -p "You will now configure xmm.def. Press enter to continue."
