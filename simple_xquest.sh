@@ -13,6 +13,7 @@
 function download {
   # Downloading xQuest/xProphet
   printf "Downloading xQuest/xProphet... "
+  mkdir $HOME/xquest
   cd $HOME/xquest
   if [ "$verbose" = "1" ]; then
     wget -q --user=xquest --password=xprophet http://proteomics.ethz.ch/xquest2_www//downloads/V2_1_1.tar
