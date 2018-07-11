@@ -34,10 +34,11 @@ function download {
   # Installing dependencies
   printf "Installing dependencies...\nThe script will ask you your password to run apt-get, install dos2unix and run cpan.
 For the latter, please use the default configuration.\n"
+  read -p "Press enter to continue."
   cd V2_1_1/xquest/installation
   chmod 755 install_packages.sh
   ./install_packages.sh
-  printf "Done.\n\n"
+  printf "Installing dependencies... Done.\n\n"
 
   # Installing xQuest/xProphet
   printf "Installing xQuest/xProphet...\n"
@@ -47,7 +48,19 @@ For the latter, please use the default configuration.\n"
   mv install_xquest_new.sh install_xquest.sh
   chmod 755 install_xquest.sh
   ./install_xquest.sh
-  printf "Done.\n\n"
+  printf "Installing xQuest/xProphet... Done.\n\n"
+
+  # Adding xQuest bin to PATH
+  case ":$PATH:" in
+    *:$HOME/xquest/V2_1_1/xquest/bin:*) printf "PATH correctly set.\n\n"
+                                        ;;
+    *)  printf "Setting PATH... "
+        cp $HOME/.bashrc $HOME/.bashrc.bak
+        echo "export PATH=$PATH:$HOME/xquest/V2_1_1/xquest/bin" >> $HOME/.bashrc
+        source $HOME/.bashrc
+        printf "Done.\n\n"
+        ;;
+  esac
 
   # Configuring Apache 2
   sudo service apache2 restart
@@ -81,7 +94,9 @@ For the latter, please use the default configuration.\n"
 
   # Restarting Apache 2 server
   sudo service apache2 restart
-  printf "Done.\n\n"
+  printf "Configuring the Apache 2 web server... Done.\n\n"
+
+  printf "Please restart your terminal to take the PATH change into account.\n"
 }
 
 function usage {
@@ -95,9 +110,8 @@ and prepares the necessary directory structure in $HOME/xquest.\n\n"
 
   printf "OPTIONS: Values in [] are the default values that are used if
 the option is not provided.\n\n"
-  printf -- "\t-i | --interactive: run in interactive mode.\n\n"
   printf -- "\t-D | --download: download and install xQuest/xProphet and its
-        dependencies.\n\n"
+        dependencies. Please restart your terminal once this is done.\n\n"
   printf -- "\t-d | --directory [run]: analysis directory name.
         e.g.: $HOME/xquest/analysis/run.\n\n"
   printf -- "\t-m | --mzxml [./]: path to the mzXML files, including ending '/' e.g.
@@ -114,19 +128,6 @@ the option is not provided.\n\n"
 }
 
 ##### MAIN #####
-
-# Adding xQuest bin to PATH
-case ":$PATH:" in
-  *:$HOME/xquest/V2_1_1/xquest/bin:*) printf "PATH correctly set.\n\n"
-                                      ;;
-  *)  printf "Setting PATH... "
-      cp $HOME/.bashrc $HOME/.bashrc.bak
-      echo "export PATH=$PATH:$HOME/xquest/V2_1_1/xquest/bin" >> $HOME/.bashrc
-      source $HOME/.bashrc
-      printf "Done.\n\n"
-      ;;
-esac
-
 dl=
 xquest=
 xprophet=
@@ -159,7 +160,7 @@ while [ "$1" != "" ]; do
                           ;;
     -p | --xprophet)      xprophet=1
                           ;;
-    -v | --verbose        verbose=1
+    -v | --verbose)       verbose=1
                           ;;
     -h | --help)          usage
                           exit
@@ -170,15 +171,16 @@ while [ "$1" != "" ]; do
   shift
 done
 
+# Download and install xQuest/xProphet and its dependencies
+if [ "$dl" = "1" ]; then
+  download
+  exit 1
+fi
+
 # Creating directory structure
 printf "Creating directory structure... "
 mkdir -p $HOME/xquest/{results,analysis/$directory/{mzxml,db}}
 printf "Done.\n\n"
-
-# Download and install xQuest/xProphet and its dependencies
-if [ "$dl" = "1" ]; then
-  download
-fi
 
 # Move the mzxml and fasta files to the analysis directory, create definition files
 # and reverse database
@@ -206,10 +208,10 @@ if [ "$xquest" = "1" ]; then
   printf "Configuring the search...\n\n"
   ls mzxml/ | sed 's/\(.*\)\..*/\1/' > files
   pQuest.pl -list files -path $HOME/xquest/analysis/$directory/mzxml/
-  printf "Done.\n\n"
+  printf "Configuring the search... Done.\n\n"
   printf "Running the search...\n\n"
   runXquest.pl -list files -xmlmode -pseudosh
-  printf "Done.\n\n"
+  printf "Running the search... Done.\n\n"
 
   # Merging result files
   printf "Merging result files... "
@@ -242,7 +244,7 @@ if [ "$xquest" = "1" ]; then
     fi
     read -p "You will now configure xproph.def. Press enter to continue."
     nano xproph.def
-    printf "Done.\n\n"
+    printf "Configuring xProphet analysis... Done.\n\n"
 
     # Starting xProphet analysis
     printf "Running xProphet... "
@@ -251,7 +253,7 @@ if [ "$xquest" = "1" ]; then
     else
       xprophet.pl -in annotated_xquest.xml -out xquest.xml > /dev/null
     fi
-    printf "Done.\n\n"
+    printf "Running xProphet... Done.\n\n"
   else
     mv annotated_xquest xquest.xml
   fi
