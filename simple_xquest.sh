@@ -200,7 +200,7 @@ if [ -f $HOME/xquest/analysis/$directory/xquest.def ]; then
   mv xquest.def xquest.def.bak
 fi
 cp $root/deffiles/xquest.def .
-if [ -f $HOME/xquest/analysis/$directory/xquest.def ]; then
+if [ -f $HOME/xquest/analysis/$directory/xmm.def ]; then
   printf "\nxmm.def already exists, renamed to xquest.def.bak.\n"
   mv xmm.def xmm.def.bak
 fi
@@ -209,7 +209,7 @@ printf "Done.\n\n"
 
 # Configuring definition files
 sed -i "s#/path/to/database/database.fasta#$HOME/xquest/analysis/$directory/db/database.fasta#g" $HOME/xquest/analysis/$directory/xquest.def
-sed -i "s#/path/to/decoy-database/database.fasta#$HOME/xquest/analysis/$directory/db/database_decoy.fasta#g" $HOME/xquest/analysis/$directory$/xquest.def
+sed -i "s#/path/to/decoy-database/database.fasta#$HOME/xquest/analysis/$directory/db/database_decoy.fasta#g" $HOME/xquest/analysis/$directory/xquest.def
 read -p "You will now configure xquest.def. Press enter to continue."
 nano xquest.def
 read -p "You will now configure xmm.def. Press enter to continue."
@@ -249,11 +249,7 @@ if [ "$xquest" = "1" ]; then
   if [ "$xprophet" = "1" ]; then
     # Configuring xProphet analysis
     printf "Configuring xProphet analysis...\n"
-    if [ "$verbose" = "1" ]; then
-      xprophet.pl
-    else
-      xprophet.pl > /dev/null
-    fi
+    cp $root/deffiles/xproph.def .
     read -p "You will now configure xproph.def. Press enter to continue."
     nano xproph.def
     printf "Configuring xProphet analysis... Done.\n\n"
