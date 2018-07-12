@@ -4,6 +4,8 @@ This script can download and install the xQuest/xProphet 2.1.1 pipeline and its 
 
 Thus, the installation and use of xQuest/xProphet is greatly simplified for command line beginners.
 
+Currently, the -x (launching xQuest) and -p (launching xProphet) aurgments are unreliable and should not be used. Apache 2 configuration, directory structure creation and xQuest/xProphet installation should work fine.
+
 ## Prerequisites
 
 This script runs on Ubuntu 18.04 LTS. All dependencies for xQuest/xProphet can be installed through the script.
