@@ -80,7 +80,7 @@ For the latter, please use the default configuration.\n"
   sudo sed -i "s/Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch/Options +ExecCGI/g" /etc/apache2/conf-available/serve-cgi-bin.conf
   # 000-default.conf
   sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak
-  sudo sed -i "s#DocumentRoot /var/www/html/#DocumentRoot /var/www#g" /etc/apache2/sites-available/000-default.conf
+  sudo sed -i "s#DocumentRoot /var/www/html#DocumentRoot /var/www#g" /etc/apache2/sites-available/000-default.conf
   # Enabling CGI module
   sudo a2enmod cgi
   # Creating cgi-bin folder and symlinks
