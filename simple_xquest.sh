@@ -115,6 +115,8 @@ the option is not provided.\n\n"
         dependencies. Please restart your terminal once this is done.\n\n"
   printf -- "\t-d | --directory [run]: analysis directory name.
         e.g.: $HOME/xquest/analysis/run.\n\n"
+  printf -- "\t-c | --configure: path to existing xquest and xmm definition files.
+        e.g. /path/to/deffiles/. If none are provided, default files will be added.\n\n"
   printf -- "\t-m | --mzxml [./]: path to the mzXML files, including ending '/' e.g.
         /path/to/mzXML/.\n\n"
   printf -- "\t-f | --fasta [./my_db.fasta]: path to the FASTA database, e.g.
@@ -134,6 +136,7 @@ dl=
 xquest=
 xprophet=
 directory="run"
+deffiles="$root/deffiles/"
 mzxml="./"
 fasta="./"
 
@@ -147,6 +150,9 @@ fi
 # Command line options
 while [ "$1" != "" ]; do
   case $1 in
+    -c | --configure)     shift
+                          deffiles=$1
+                          ;;
     -D | --download)      dl=1
                           ;;
     -d | --directory)     shift
@@ -179,6 +185,11 @@ if [ "$dl" = "1" ]; then
   exit 1
 fi
 
+if [ -d "$HOME/xquest/analysis/$directory/" ]; then
+  printf "Directory $HOME/xquest/analysis/$directory already exists."
+  exit 1
+fi
+
 # Creating directory structure
 printf "Creating directory structure... "
 mkdir -p $HOME/xquest/{results,analysis/$directory/{mzxml,db}}
@@ -195,16 +206,8 @@ if [ "$verbose" = "1" ]; then
 else
   xdecoy.pl -db db/database.fasta > /dev/null
 fi
-if [ -f $HOME/xquest/analysis/$directory/xquest.def ]; then
-  printf "\nxquest.def already exists, renamed to xquest.def.bak.\n"
-  mv xquest.def xquest.def.bak
-fi
-cp $root/deffiles/xquest.def .
-if [ -f $HOME/xquest/analysis/$directory/xmm.def ]; then
-  printf "\nxmm.def already exists, renamed to xquest.def.bak.\n"
-  mv xmm.def xmm.def.bak
-fi
-cp $root/deffiles/xmm.def .
+cp $deffiles/xquest.def .
+cp $deffiles/xmm.def .
 printf "Done.\n\n"
 
 # Configuring definition files

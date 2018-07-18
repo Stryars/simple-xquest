@@ -1,7 +1,7 @@
 ### xProphet v.2.5.1 definition file ###
 ### Parameters for availaible filters, which are applied before calculating FDRs. ###
-minborder -4      # filter for minimum precursor mass error (ppm)
-maxborder 7       # filter for maximum precursor mass error (ppm)
+minborder -10      # filter for minimum precursor mass error (ppm)
+maxborder 10       # filter for maximum precursor mass error (ppm)
 mindeltas 0.95    # filter for delta score, 0 is no filter, minimum delta score required, hits are rejected if larger or equal
 uniquexl 1        # [1|0] calculate statistics based on unique IDs [1]
 qtransform 1      # transform simple FDR to q-FDR values
