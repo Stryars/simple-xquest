@@ -21,12 +21,6 @@ chmod 755 simple_xquest.sh
 ./simple_xquest.sh -h
 ```
 
-## Instructions
-
-If you would like to install xQuest/xProphet on another Unix/Linux distribution, here are the installation steps used by this script:
-
-TODO
-
 ## Authors
 
 - **Samuel Diebolt** - <samuel.diebolt@espci.fr>

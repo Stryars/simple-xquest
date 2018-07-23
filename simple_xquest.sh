@@ -69,10 +69,12 @@ For the latter, please use the default configuration.\n"
   sudo chmod -R 777 $HOME/xquest/results
   # apache2.conf
   sudo cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak
+  sudo bash -c 'echo "# Added by Simple xQuest" >> /etc/apache2/apache2.conf'
   sudo bash -c 'echo "ServerName localhost" >> /etc/apache2/apache2.conf'
   sudo bash -c 'echo "ScriptAlias /cgi-bin/ /var/www/cgi-bin/" >> /etc/apache2/apache2.conf'
   sudo bash -c 'echo "Options +ExecCGI" >> /etc/apache2/apache2.conf'
   sudo bash -c 'echo "AddHandler cgi-script .cgi .pl .py" >> /etc/apache2/apache2.conf'
+  sudo sed -i "s/Timeout 300/Timeout 30000/g" /etc/apache2/apache2.conf
   # serve-cgi-bin.conf
   sudo cp /etc/apache2/conf-available/serve-cgi-bin.conf /etc/apache2/conf-available/serve-cgi-bin.conf.bak
   sudo sed -i "s#/usr/lib/#/var/www/#g" /etc/apache2/conf-available/serve-cgi-bin.conf
@@ -185,30 +187,30 @@ if [ "$dl" = "1" ]; then
   exit 1
 fi
 
-if [ -d "$HOME/xquest/analysis/$directory/" ]; then
-  printf "Directory $HOME/xquest/analysis/$directory already exists."
-  exit 1
-fi
+if [ ! -d "$HOME/xquest/analysis/$directory/" ]; then
+  # Creating directory structure
+  printf "Creating directory structure... "
+  mkdir -p $HOME/xquest/{results,analysis/$directory/{mzxml,db}}
+  printf "Done.\n\n"
 
-# Creating directory structure
-printf "Creating directory structure... "
-mkdir -p $HOME/xquest/{results,analysis/$directory/{mzxml,db}}
-printf "Done.\n\n"
-
-# Move the mzxml and fasta files to the analysis directory, create definition files
-# and reverse database
-printf "Copying mzxml and fasta files to $HOME/xquest/analysis/$directory/... "
-cd $HOME/xquest/analysis/$directory/
-cp $mzxml/*.mzXML mzxml/
-cp $fasta db/database.fasta
-if [ "$verbose" = "1" ]; then
-  xdecoy.pl -db db/database.fasta
+  # Move the mzxml and fasta files to the analysis directory, create definition files
+  # and reverse database
+  printf "Copying mzxml and fasta files to $HOME/xquest/analysis/$directory/... "
+  cd $HOME/xquest/analysis/$directory/
+  cp $mzxml/*.mzXML mzxml/
+  cp $fasta db/database.fasta
+  if [ "$verbose" = "1" ]; then
+    xdecoy.pl -db db/database.fasta
+  else
+    xdecoy.pl -db db/database.fasta > /dev/null
+  fi
+  cp $deffiles/xquest.def .
+  cp $deffiles/xmm.def .
+  printf "Done.\n\n"
 else
-  xdecoy.pl -db db/database.fasta > /dev/null
+  printf "Directory $HOME/xquest/analysis/$directory already exists. Using existing files."
+  cd $HOME/xquest/analysis/$directory/
 fi
-cp $deffiles/xquest.def .
-cp $deffiles/xmm.def .
-printf "Done.\n\n"
 
 # Configuring definition files
 sed -i "s#/path/to/database/database.fasta#$HOME/xquest/analysis/$directory/db/database.fasta#g" $HOME/xquest/analysis/$directory/xquest.def
@@ -218,36 +220,38 @@ nano xquest.def
 read -p "You will now configure xmm.def. Press enter to continue."
 nano xmm.def
 
+# Creating the mzXML files list
+ls mzxml/ | sed 's/\(.*\)\..*/\1/' > files
+
 # Starting the search
 if [ "$xquest" = "1" ]; then
-  printf "Configuring the search...\n\n"
-  ls mzxml/ | sed 's/\(.*\)\..*/\1/' > files
+  printf "Configuring the search with pQuest.pl...\n\n"
   pQuest.pl -list files -path $HOME/xquest/analysis/$directory/mzxml/
-  printf "Configuring the search... Done.\n\n"
+  printf "Configuring the search with pQuest.pl... Done.\n\n"
   printf "Running the search...\n\n"
   runXquest.pl -list files -xmlmode -pseudosh
   printf "Running the search... Done.\n\n"
 
   # Merging result files
-  printf "Merging result files... "
+  printf "Merging result files...\n"
   resultfolder=$HOME/xquest/analysis/$directory/results$directory
   printf $resultfolder
   if [ "$verbose" = "1" ]; then
-    mergexml.pl -list resultdirectories_fullpath -resdir $resultfolder
+    mergexml.pl -list resultdirectories_fullpath -resdir $resultfolder -v
   else
-    mergexml.pl -list resultdirectories_fullpath -resdir $resultfolder > /dev/null
+    mergexml.pl -list resultdirectories_fullpath -resdir $resultfolder
   fi
-  printf "Done.\n\n"
+  printf "Merging result files... Done.\n\n"
 
   # Annotate search results
-  printf "Annotating search results... "
+  printf "Annotating search results...\n"
   cd $resultfolder
   if [ "$verbose" = "1" ]; then
-    annotatexml.pl -xmlfile merged_xquest.xml -out annotated_xquest.xml -native
+    annotatexml.pl -xmlfile merged_xquest.xml -out annotated_xquest.xml -native -v
   else
-    annotatexml.pl -xmlfile merged_xquest.xml -out annotated_xquest.xml -native > /dev/null
+    annotatexml.pl -xmlfile merged_xquest.xml -out annotated_xquest.xml -native
   fi
-  printf "Done.\n\n"
+  printf "Annotating search results... Done.\n\n"
 
   if [ "$xprophet" = "1" ]; then
     # Configuring xProphet analysis
@@ -258,7 +262,7 @@ if [ "$xquest" = "1" ]; then
     printf "Configuring xProphet analysis... Done.\n\n"
 
     # Starting xProphet analysis
-    printf "Running xProphet... "
+    printf "Running xProphet...\n"
     if [ "$verbose" = "1" ]; then
       xprophet.pl -in annotated_xquest.xml -out xquest.xml
     else
@@ -272,7 +276,7 @@ if [ "$xquest" = "1" ]; then
   # Copying results to the results folder for the web server
   printf "Copying results to the web server...\nThe script will ask your password to give the correct permissions to Apache 2.\n"
   cp -R $resultfolder $HOME/xquest/results
-  sudo chmod -R 777 $HOME/xquest/results/results$directory
+  sudo chmod -R 777 $HOME/xquest/results/
   printf "Done.\n\n"
 
   # Displaying the result manager
