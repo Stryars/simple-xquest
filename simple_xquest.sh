@@ -109,7 +109,7 @@ function usage {
 pipeline and its dependencies (Apache 2, Perl libraries, etc.)
 and prepares the necessary directory structure in $HOME/xquest.\n\n"
 
-  printf "USAGE: xquest_prepare -option [parameter]\n\n"
+  printf "USAGE: ./simple_xquest -option [parameter]\n\n"
 
   printf "OPTIONS: Values in [] are the default values that are used if
 the option is not provided.\n\n"
@@ -129,7 +129,7 @@ the option is not provided.\n\n"
   printf -- "\t-v | --verbose: verbose mode.\n\n"
   printf -- "\t-h | --help: prints this help.\n\n"
 
-  printf "EXAMPLE: xquest_prepare -l files -p /path/to/mzXML/.\n"
+  printf "EXAMPLE: ./simple_xquest -d run -m /path/to/mzXML/ -f /path/to/db.fasta.\n"
 }
 
 ##### MAIN #####
